@@ -157,6 +157,11 @@ export default class EditorController extends Controller {
     return this.notifyEditorElement("change")
   }
 
+  compoisitionDidResizeAttachment(attachment, dimensions) {
+    this.compositionController.invalidateViewForObject(attachment)
+    return this.notifyEditorElement("attachment-resize", { attachment, dimensions })
+  }
+
   compositionDidChangeAttachmentPreviewURL(attachment) {
     this.compositionController.invalidateViewForObject(attachment)
     return this.notifyEditorElement("change")

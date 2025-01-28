@@ -7,6 +7,8 @@ export default {
   attachmentName: "attachment__name",
   attachmentProgress: "attachment__progress",
   attachmentSize: "attachment__size",
+  attachmentToolbarContainer: "attachment__toolbar-container",
   attachmentToolbar: "attachment__toolbar",
   attachmentGallery: "attachment-gallery",
+  attachmentResizeHandle: "attachment-resize--handle"
 }
