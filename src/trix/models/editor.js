@@ -192,8 +192,9 @@ export default class Editor {
 
   getContentWithAttachments() {
     const content = []
-    this.document.blockList.eachObject((block) => {
-      block.text.getStringContent().forEach((piece) => {
+    this.getDocument().blockList.eachObject((block) => {
+      const pieces = block.text.getPieces()
+      pieces.forEach((piece) => {
         if (piece.attachment) {
           const attachment = piece.attachment
           if (attachment.getContent()) {
