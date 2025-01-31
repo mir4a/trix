@@ -135,7 +135,9 @@ export default class AttachmentEditorController extends BasicObject {
       data: { trixAction: "resize" },
     })
 
-    element.appendChild(resizeHandleElement)
+    if (this.isImage()) {
+      element.appendChild(resizeHandleElement)
+    }
 
     if (this.attachment.isPreviewable()) {
       // <div class="#{css.attachmentMetadataContainer}">
@@ -175,10 +177,13 @@ export default class AttachmentEditorController extends BasicObject {
       matchingSelector: "[data-trix-action]",
       withCallback: this.didClickActionButton,
     })
-    handleEvent("pointerdown", {
-      onElement: resizeHandleElement,
-      withCallback: this.startResize.bind(this)
-    })
+
+    if (this.isImage()) {
+      handleEvent("pointerdown", {
+        onElement: resizeHandleElement,
+        withCallback: this.startResize.bind(this)
+      })
+    }
 
     triggerEvent("trix-attachment-before-toolbar", { onElement: this.element, attributes: { toolbar: element, attachment: this.attachment } })
 
@@ -311,5 +316,9 @@ export default class AttachmentEditorController extends BasicObject {
 
     document.addEventListener("pointermove", resize)
     document.addEventListener("pointerup", stopResize)
+  }
+
+  isImage() {
+    return this.attachment.getContentType().startsWith("image/")
   }
 }
