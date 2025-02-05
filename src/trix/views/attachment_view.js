@@ -67,6 +67,8 @@ export default class AttachmentView extends ObjectView {
   }
 
   createCaptionElement() {
+    if (this.attachment.getContentType() === "text/html") return null
+
     const figcaption = makeElement({ tagName: "figcaption", className: css.attachmentCaption })
     const caption = this.attachmentPiece.getCaption()
     if (caption) {

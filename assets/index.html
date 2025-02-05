@@ -72,10 +72,28 @@
           }, 30)
         }
       });
+
+      function addContentAttachment() {
+        const attachment = new Trix.Attachment({ content: `{{ var }}`, contentType: "text/html" });
+        const element = document.querySelector("trix-editor")
+        element.editor.insertAttachment(attachment);
+      }
+
+      function addLinkContentAttachment() {
+        const attachment = new Trix.Attachment({ content: `{{ link }}`, contentType: "text/html", href: "{{ link }}" });
+        const element = document.querySelector("trix-editor")
+        element.editor.insertAttachment(attachment);
+      }
+
+      document.getElementById("addContentAttachment").addEventListener("click", addContentAttachment);
+      document.getElementById("addLinkContentAttachment").addEventListener("click", addLinkContentAttachment);
+
     </script>
   </head>
   <body>
     <main>
+      <button type="button" id="addContentAttachment">Add content attachment</button>
+      <button type="button" id="addLinkContentAttachment">Add content attachment with href</button>
       <trix-editor autofocus class="trix-content" input="input"></trix-editor>
       <details id="output">
         <summary>Output</summary>
