@@ -44,7 +44,9 @@ export default class AttachmentView extends ObjectView {
       })
     }
 
-    innerElement.appendChild(this.createCaptionElement())
+    if (this.isImage()) {
+      innerElement.appendChild(this.createCaptionElement())
+    }
 
     if (this.attachment.isPending()) {
       this.progressElement = makeElement({
@@ -67,8 +69,6 @@ export default class AttachmentView extends ObjectView {
   }
 
   createCaptionElement() {
-    if (this.attachment.getContentType() === "text/html") return null
-
     const figcaption = makeElement({ tagName: "figcaption", className: css.attachmentCaption })
     const caption = this.attachmentPiece.getCaption()
     if (caption) {
@@ -156,6 +156,10 @@ export default class AttachmentView extends ObjectView {
     if (progressElement) {
       progressElement.value = value
     }
+  }
+
+  isImage() {
+    return this.attachment.getContentType().startsWith("image/")
   }
 }
 
