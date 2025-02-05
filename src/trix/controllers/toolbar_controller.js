@@ -3,7 +3,7 @@ import BasicObject from "trix/core/basic_object"
 import { findClosestElementFromNode, handleEvent, triggerEvent } from "trix/core/helpers"
 
 import DOMPurify from "dompurify"
-
+import { CURLY_VARIABLES_REGEX } from "trix/constants"
 const attributeButtonSelector = "[data-trix-attribute]"
 const actionButtonSelector = "[data-trix-action]"
 const toolbarButtonSelector = `${attributeButtonSelector}, ${actionButtonSelector}`
@@ -210,7 +210,12 @@ export default class ToolbarController extends BasicObject {
 
     if (input.willValidate) {
       input.setCustomValidity("")
-      if (!input.checkValidity() || !this.isSafeAttribute(input)) {
+      const isUrlInput = input.type === "url"
+      const hasCurlyBracePattern = CURLY_VARIABLES_REGEX.test(input.value)
+
+      if (!isUrlInput && !input.checkValidity() ||
+          isUrlInput && !hasCurlyBracePattern && !input.checkValidity() ||
+          !this.isSafeAttribute(input)) {
         input.setCustomValidity("Invalid value")
         input.setAttribute("data-trix-validate", "")
         input.classList.add("trix-validate")
