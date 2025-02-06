@@ -196,7 +196,35 @@ export default class ToolbarController extends BasicObject {
     if (attributeName) {
       const input = getInputForDialog(element, dialogName)
       if (input) {
-        input.value = this.attributes[attributeName] || ""
+        let value = this.attributes[attributeName] || ""
+
+        // For the href attribute, if no computed value exists,
+        // check if the active selection contains an attachment with contentType "text/html".
+        if (attributeName === "href" && value === "") {
+          // Climb up from the dialog to find the closest toolbar.
+          const toolbarElement = this.element.closest("trix-toolbar")
+          if (toolbarElement && toolbarElement.id) {
+            const toolbarId = toolbarElement.id
+            // Locate the trix-editor that references this toolbar via its toolbar attribute.
+            const editorElement = document.querySelector(`trix-editor[toolbar="${toolbarId}"]`)
+            if (
+              editorElement &&
+              editorElement.editor &&
+              editorElement.editor.composition &&
+              typeof editorElement.editor.composition.getSelectedAttachments === "function"
+            ) {
+              const attachments = editorElement.editor.composition.getSelectedAttachments()
+              if (attachments && attachments.length > 0) {
+                const attachment = attachments[0]
+                if (attachment && attachment.getContentType() === "text/html") {
+                  value = attachment.getHref() || ""
+                }
+              }
+            }
+          }
+        }
+
+        input.value = value
         input.select()
       }
     }
@@ -222,6 +250,23 @@ export default class ToolbarController extends BasicObject {
         return input.focus()
       }
     }
+
+    // Add handling for attachments
+    if (attributeName === "href") {
+      const toolbarElement = this.element.closest("trix-toolbar")
+      if (toolbarElement && toolbarElement.id) {
+        const editorElement = document.querySelector(`trix-editor[toolbar="${toolbarElement.id}"]`)
+        if (editorElement?.editor?.composition?.getSelectedAttachments) {
+          const attachments = editorElement.editor.composition.getSelectedAttachments()
+          if (attachments && attachments.length > 0) {
+            const attachment = attachments[0]
+            this.delegate?.toolbarDidUpdateAttribute(attributeName, input.value, attachment)
+            return this.hideDialog()
+          }
+        }
+      }
+    }
+
     this.delegate?.toolbarDidUpdateAttribute(attributeName, input.value)
     return this.hideDialog()
   }
@@ -236,6 +281,23 @@ export default class ToolbarController extends BasicObject {
 
   removeAttribute(dialogElement) {
     const attributeName = getAttributeName(dialogElement)
+
+    // Add handling for attachments
+    if (attributeName === "href") {
+      const toolbarElement = this.element.closest("trix-toolbar")
+      if (toolbarElement && toolbarElement.id) {
+        const editorElement = document.querySelector(`trix-editor[toolbar="${toolbarElement.id}"]`)
+        if (editorElement?.editor?.composition?.getSelectedAttachments) {
+          const attachments = editorElement.editor.composition.getSelectedAttachments()
+          if (attachments && attachments.length > 0) {
+            const attachment = attachments[0]
+            this.delegate?.toolbarDidRemoveAttribute(attributeName, attachment)
+            return this.hideDialog()
+          }
+        }
+      }
+    }
+
     this.delegate?.toolbarDidRemoveAttribute(attributeName)
     return this.hideDialog()
   }
