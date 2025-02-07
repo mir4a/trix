@@ -200,6 +200,7 @@ trix-editor {
       bottom: 0;
       right: 0;
       color: #000;
+      text-shadow: 1px 1px 0px #ffffff, -1px -1px 0px #ffffff, -1px 1px 0px #FFFFFF, 1px -1px 0px #ffffff;
 
       &:hover {
         cursor: se-resize;
