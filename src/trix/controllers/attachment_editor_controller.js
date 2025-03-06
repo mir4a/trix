@@ -41,7 +41,7 @@ export default class AttachmentEditorController extends BasicObject {
     this.setFigureWidth()
     this.makeElementMutable()
     this.addToolbar()
-    if (this.attachment.isPreviewable()) {
+    if (this.attachment.isPreviewable() && !this.attachment.isBase64()) {
       this.installCaptionEditor()
     }
   }
@@ -135,7 +135,7 @@ export default class AttachmentEditorController extends BasicObject {
       data: { trixAction: "resize" },
     })
 
-    if (this.isImage()) {
+    if (this.attachment.isPreviewable()) {
       element.appendChild(resizeHandleElement)
     }
 
@@ -178,7 +178,7 @@ export default class AttachmentEditorController extends BasicObject {
       withCallback: this.didClickActionButton,
     })
 
-    if (this.isImage()) {
+    if (this.attachment.isPreviewable()) {
       handleEvent("pointerdown", {
         onElement: resizeHandleElement,
         withCallback: this.startResize.bind(this)
@@ -316,9 +316,5 @@ export default class AttachmentEditorController extends BasicObject {
 
     document.addEventListener("pointermove", resize)
     document.addEventListener("pointerup", stopResize)
-  }
-
-  isImage() {
-    return this.attachment.getContentType().startsWith("image/")
   }
 }

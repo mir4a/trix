@@ -72,6 +72,10 @@ export default class Attachment extends TrixObject {
     }
   }
 
+  isBase64() {
+    return this.getURL()?.startsWith("data:")
+  }
+
   getType() {
     if (this.hasContent()) {
       return "content"
