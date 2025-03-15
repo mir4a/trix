@@ -157,6 +157,11 @@ export default class EditorController extends Controller {
     return this.notifyEditorElement("change")
   }
 
+  compoisitionDidResizeAttachment(attachment, dimensions) {
+    this.compositionController.invalidateViewForObject(attachment)
+    return this.notifyEditorElement("attachment-resize", { attachment, dimensions })
+  }
+
   compositionDidChangeAttachmentPreviewURL(attachment) {
     this.compositionController.invalidateViewForObject(attachment)
     return this.notifyEditorElement("change")
@@ -387,18 +392,28 @@ export default class EditorController extends Controller {
     }
   }
 
-  toolbarDidUpdateAttribute(attributeName, value) {
+  toolbarDidUpdateAttribute(attributeName, value, attachment) {
     this.recordFormattingUndoEntry(attributeName)
-    this.composition.setCurrentAttribute(attributeName, value)
+    if (attachment) {
+      attachment.setAttributes({ [attributeName]: value })
+      this.render()
+    } else {
+      this.composition.setCurrentAttribute(attributeName, value)
+    }
     this.render()
     if (!this.selectionFrozen) {
       return this.editorElement.focus()
     }
   }
 
-  toolbarDidRemoveAttribute(attributeName) {
+  toolbarDidRemoveAttribute(attributeName, attachment) {
     this.recordFormattingUndoEntry(attributeName)
-    this.composition.removeCurrentAttribute(attributeName)
+    if (attachment) {
+      attachment.setAttributes({ [attributeName]: null })
+      this.render()
+    } else {
+      this.composition.removeCurrentAttribute(attributeName)
+    }
     this.render()
     if (!this.selectionFrozen) {
       return this.editorElement.focus()

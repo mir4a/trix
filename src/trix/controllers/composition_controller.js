@@ -156,6 +156,10 @@ export default class CompositionController extends BasicObject {
     return this.delegate?.compositionControllerDidRequestDeselectingAttachment?.(attachment)
   }
 
+  attachmentEditorDidRequestResizing(attachment, dimensions) {
+    return this.delegate?.compoisitionDidResizeAttachment(attachment, dimensions)
+  }
+
   // Private
 
   canSyncDocumentView() {

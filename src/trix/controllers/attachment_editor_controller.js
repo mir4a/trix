@@ -38,9 +38,10 @@ export default class AttachmentEditorController extends BasicObject {
   }
 
   install() {
+    this.setFigureWidth()
     this.makeElementMutable()
     this.addToolbar()
-    if (this.attachment.isPreviewable()) {
+    if (this.attachment.isPreviewable() && !this.attachment.isBase64()) {
       this.installCaptionEditor()
     }
   }
@@ -71,6 +72,13 @@ export default class AttachmentEditorController extends BasicObject {
 
   // Installing and uninstalling
 
+  setFigureWidth = () => {
+    if (this.attachment.getWidth()) {
+      this.element.style.width = `${this.attachment.getWidth()}px`
+    }
+  }
+
+
   makeElementMutable = undoable(() => {
     return {
       do: () => {
@@ -81,6 +89,9 @@ export default class AttachmentEditorController extends BasicObject {
   })
 
   addToolbar = undoable(() => {
+    const figureWidth = this.element.offsetWidth
+    const imageProprtion = this.attachment.getHeight()/this.attachment.getWidth()
+    const renderedImageHeight = figureWidth * imageProprtion
     // <div class="#{css.attachmentMetadataContainer}" data-trix-mutable="true">
     //   <div class="trix-button-row">
     //     <span class="trix-button-group trix-button-group--actions">
@@ -90,24 +101,43 @@ export default class AttachmentEditorController extends BasicObject {
     // </div>
     const element = makeElement({
       tagName: "div",
-      className: css.attachmentToolbar,
-      data: { trixMutable: true },
+      className: css.attachmentToolbarContainer,
+      style: {
+        height: `${renderedImageHeight}px`
+      },
       childNodes: makeElement({
         tagName: "div",
-        className: "trix-button-row",
+        className: css.attachmentToolbar,
+        data: { trixMutable: true },
         childNodes: makeElement({
-          tagName: "span",
-          className: "trix-button-group trix-button-group--actions",
+          tagName: "div",
+          className: "trix-button-row",
           childNodes: makeElement({
-            tagName: "button",
-            className: "trix-button trix-button--remove",
-            textContent: lang.remove,
-            attributes: { title: lang.remove },
-            data: { trixAction: "remove" },
+            tagName: "span",
+            className: "trix-button-group trix-button-group--actions",
+            childNodes: makeElement({
+              tagName: "button",
+              className: "trix-button trix-button--remove",
+              textContent: lang.remove,
+              attributes: { title: lang.remove },
+              data: { trixAction: "remove" },
+            })
           }),
         }),
       }),
     })
+
+    const resizeHandleElement = makeElement({
+      tagName: "span",
+      className: css.attachmentResizeHandle,
+      textContent: "◢",
+      attributes: { title: lang.resize },
+      data: { trixAction: "resize" },
+    })
+
+    if (this.attachment.isPreviewable()) {
+      element.appendChild(resizeHandleElement)
+    }
 
     if (this.attachment.isPreviewable()) {
       // <div class="#{css.attachmentMetadataContainer}">
@@ -147,6 +177,13 @@ export default class AttachmentEditorController extends BasicObject {
       matchingSelector: "[data-trix-action]",
       withCallback: this.didClickActionButton,
     })
+
+    if (this.attachment.isPreviewable()) {
+      handleEvent("pointerdown", {
+        onElement: resizeHandleElement,
+        withCallback: this.startResize.bind(this)
+      })
+    }
 
     triggerEvent("trix-attachment-before-toolbar", { onElement: this.element, attributes: { toolbar: element, attachment: this.attachment } })
 
@@ -235,5 +272,49 @@ export default class AttachmentEditorController extends BasicObject {
 
   didBlurCaption(event) {
     return this.savePendingCaption()
+  }
+
+  startResize(event) {
+    event.preventDefault()
+
+    const initialX = event.clientX
+    const initialWidth = this.element.querySelector("img").width || 100
+    const initialHeight = this.element.querySelector("img").height || 100
+    let newWidth
+    let newHeight
+    const resize = (moveEvent) => {
+      const deltaX = moveEvent.clientX - initialX
+
+      // Calculate new dimensions maintaining aspect ratio
+      const aspectRatio = initialWidth / initialHeight
+      newWidth = Math.round(Math.max(50, initialWidth + deltaX))
+      newHeight = Math.round(newWidth / aspectRatio)
+
+      // Update the image element dimensions
+      const img = this.element.querySelector("img")
+      const toolbarContainer = this.element.querySelector(`.${css.attachmentToolbarContainer}`)
+
+      this.element.style.width = `${newWidth}px`
+      toolbarContainer.style.height = `${newHeight}px`
+      img.style.width = `${newWidth}px`
+      img.style.height = `${newHeight}px`
+    }
+
+    const stopResize = () => {
+      // Notify delegate of resize
+      this.delegate?.attachmentEditorDidRequestResizing?.(
+        this.attachment,
+        { width: newWidth, height: newHeight }
+      )
+      this.attachment.setAttributes({
+        width: newWidth,
+        height: newHeight
+      })
+      document.removeEventListener("pointermove", resize)
+      document.removeEventListener("pointerup", stopResize)
+    }
+
+    document.addEventListener("pointermove", resize)
+    document.addEventListener("pointerup", stopResize)
   }
 }

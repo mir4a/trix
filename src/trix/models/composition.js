@@ -358,6 +358,10 @@ export default class Composition extends BasicObject {
     const [ startPosition, endPosition ] = Array.from(selectedRange)
     if (startPosition === endPosition) {
       if (attributeName === "href") {
+        const attachment = this.getAttachmentAtRange(selectedRange)
+        if (attachment) {
+          return this.updateAttributesForAttachment({ href: value }, attachment)
+        }
         const text = Text.textForStringWithAttributes(value, { href: value })
         return this.insertText(text)
       }

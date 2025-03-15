@@ -23,6 +23,9 @@ export default class AttachmentView extends ObjectView {
     const figure = innerElement = makeElement({
       tagName: "figure",
       className: this.getClassName(),
+      style: {
+        width: `${this.attachment.getWidth()}px`
+      },
       data: this.getData(),
       editable: false,
     })
@@ -41,7 +44,9 @@ export default class AttachmentView extends ObjectView {
       })
     }
 
-    innerElement.appendChild(this.createCaptionElement())
+    if (this.isImage()) {
+      innerElement.appendChild(this.createCaptionElement())
+    }
 
     if (this.attachment.isPending()) {
       this.progressElement = makeElement({
@@ -151,6 +156,10 @@ export default class AttachmentView extends ObjectView {
     if (progressElement) {
       progressElement.value = value
     }
+  }
+
+  isImage() {
+    return this.attachment.getContentType().startsWith("image/")
   }
 }
 

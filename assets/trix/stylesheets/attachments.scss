@@ -85,6 +85,14 @@ trix-editor {
     left: 0;
     width: 100%;
     text-align: center;
+
+    &-container {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      right: 0;
+      left: 0;
+    }
   }
 
   .trix-button-group {
@@ -182,6 +190,21 @@ trix-editor {
     .attachment__size {
       margin-left: 0.2em;
       white-space: nowrap;
+    }
+  }
+
+  .attachment-resize {
+    &--handle {
+      line-height: 16px;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      color: #000;
+      text-shadow: 1px 1px 0px #ffffff, -1px -1px 0px #ffffff, -1px 1px 0px #FFFFFF, 1px -1px 0px #ffffff;
+
+      &:hover {
+        cursor: se-resize;
+      }
     }
   }
 }

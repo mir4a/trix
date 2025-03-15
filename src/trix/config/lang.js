@@ -15,6 +15,7 @@ export default {
   quote: "Quote",
   redo: "Redo",
   remove: "Remove",
+  resize: "Resize",
   strike: "Strikethrough",
   undo: "Undo",
   unlink: "Unlink",

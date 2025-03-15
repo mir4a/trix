@@ -189,4 +189,24 @@ export default class Editor {
       return this.undoManager.undo()
     }
   }
+
+  getContentWithAttachments() {
+    const content = []
+    this.getDocument().blockList.eachObject((block) => {
+      const pieces = block.text.getPieces()
+      pieces.forEach((piece) => {
+        if (piece.attachment) {
+          const attachment = piece.attachment
+          if (attachment.getContent()) {
+            content.push(attachment.getContent())
+          } else if (attachment.getFilename()) {
+            content.push(attachment.getFilename())
+          }
+        } else {
+          content.push(piece.toString())
+        }
+      })
+    })
+    return content.join(" ")
+  }
 }
